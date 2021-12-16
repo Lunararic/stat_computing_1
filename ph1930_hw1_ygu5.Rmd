@@ -1,0 +1,93 @@
+---
+title: "Stat_computing_1"
+author: "Yue Gu"
+date: "9/17/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 2 Length of Ones
+Given an integer vector of 0 and 1’s, write an R function named len_one that returns the length of its longest subsequence of consecutive 1’s, among all possible subsequences of consecutive 1’s.
+```{r}
+# write function
+len_one = function(seq){
+  s = rle(seq)
+  l = s$lengths[s$val == 1]
+  if (length(l) > 0)
+    max(l)
+  else
+    0
+}
+# test
+len_one(c(0, 0, 1, 1, 1, 0, 1, 1))
+len_one(c(1, 1, 1, 1))
+len_one(c(0, 0, 0, 0))
+```
+
+# 3 Hybrid Matrix
+a. create a covariance matrix with 2’s on the diagonal and 1’s off the diagonal. The dimension of this matrix is 10 x 10.  
+b. convert this covariance matrix to a correlation matrix.  
+c. compute the Cholesky factorization of the correlation matrix.  
+d. create a hybrid matrix representation of both the correlation matrix and its Cholesky factorization, where its upper triangular part is the upper triangular part of the correlation matrix (excluding the diagonal) and its lower triangular part is the upper triangular part including the diagonal of the Cholesky factorization (by chol).
+```{r}
+# (a) create cov matrix
+cov_matrix = matrix(nrow = 10, ncol = 10)
+diag(cov_matrix) = 2
+cov_matrix[lower.tri(cov_matrix)]=1
+cov_matrix[upper.tri(cov_matrix)]=1
+
+cov_matrix
+
+# (b) convert cov matrix to correlation matrix
+cor_matrix = cov2cor(cov_matrix); cor_matrix
+
+# (c) compute the Cholesky factorization of the correlation matrix
+cor_matrix_chol = chol(cor_matrix); cor_matrix_chol
+t(cor_matrix_chol)
+# check result
+t(cor_matrix_chol) %*% cor_matrix_chol
+
+# (d) create a hybrid matrix representation
+hybrid_matrix = matrix(nrow = 10, ncol = 10)
+hybrid_matrix[upper.tri(hybrid_matrix)] = cor_matrix[upper.tri(cor_matrix)]
+hybrid_matrix[lower.tri(hybrid_matrix)] = cor_matrix_chol[upper.tri(cor_matrix_chol)]
+diag(hybrid_matrix) = diag(cor_matrix_chol)
+
+hybrid_matrix
+```
+
+# 4 Translation
+Roman numerals are represented by seven different symbols: I, V, X, L, C, D and M, shown by the following table:
+Symbol       Value
+I             1
+V             5
+X             10
+L             50
+C             100
+D             500
+M             1000
+Write an R function named roman_trans using appropriate data structures that returns the value of an input roman symbol listed above.
+```{r}
+roman_trans = function(x){
+  x = as.character(x)
+  ifelse(x == "I", 1, 
+         ifelse(x == "V", 5, 
+                ifelse(x == "X", 10, 
+                       ifelse(x == "L", 50, 
+                              ifelse(x == "C", 100, 
+                                     ifelse(x == "D", 500,
+                                            ifelse(x == "M", 1000, NA)))))))
+
+}
+
+# test
+roman_trans("V")
+roman_trans("I")
+roman_trans("D")
+roman_trans("M")
+
+```
+
